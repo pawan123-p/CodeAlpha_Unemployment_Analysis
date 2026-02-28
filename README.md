@@ -41,4 +41,5 @@ Data Cleaning: Stripped whitespace from column headers and handled missing frequ
 The analysis utilizes two primary datasets:
 Unemployment in India.csv: Focuses on the Rural/Urban split from 2019 to mid-2020.
 Unemployment_Rate_upto_11_2020.csv: Provides regional mapping and extended data through October 2020.
+![image](https://github.com/pawan123-p/CodeAlpha_Unemployment_Analysis/blob/main/Screenshot%202026-02-28%20122043.png)
 
