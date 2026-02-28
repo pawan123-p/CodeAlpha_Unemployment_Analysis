@@ -1,0 +1,79 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datetime import datetime
+
+plt.style.use('ggplot')
+sns.set_palette("husl")
+
+def analyze_unemployment():
+    
+    df_india = pd.read_csv('Unemployment in India.csv')
+    df_2020 = pd.read_csv('Unemployment_Rate_upto_11_2020.csv')
+
+    df_india.columns = df_india.columns.str.strip()
+    df_2020.columns = df_2020.columns.str.strip()
+
+
+    df_india.dropna(inplace=True)
+    df_2020.dropna(inplace=True)
+
+
+    df_india['Date'] = pd.to_datetime(df_india['Date'], dayfirst=True)
+    df_2020['Date'] = pd.to_datetime(df_2020['Date'], dayfirst=True)
+
+
+    df_2020['Month'] = df_2020['Date'].dt.month
+    df_2020['Month_Name'] = df_2020['Date'].dt.month_name()
+
+    
+    national_trend = df_2020.groupby('Date')['Estimated Unemployment Rate (%)'].mean().reset_index()
+    plt.figure(figsize=(12, 6))
+    sns.lineplot(data=national_trend, x='Date', y='Estimated Unemployment Rate (%)', marker='o', color='crimson', lw=2)
+    plt.axvspan('2020-03-24', '2020-05-31', color='yellow', alpha=0.3, label='Strict Lockdown Phase')
+    plt.title('National Unemployment Trend in India (Jan - Oct 2020)')
+    plt.ylabel('Unemployment Rate (%)')
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('national_trend.png')
+
+    
+    state_avg = df_2020.groupby('Region')['Estimated Unemployment Rate (%)'].mean().sort_values(ascending=False).reset_index()
+    plt.figure(figsize=(10, 12))
+    sns.barplot(data=state_avg, x='Estimated Unemployment Rate (%)', y='Region', palette='magma')
+    plt.title('Average Unemployment Rate by State (2020)')
+    plt.xlabel('Unemployment Rate (%)')
+    plt.tight_layout()
+    plt.savefig('state_unemployment.png')
+
+
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(data=df_india, x='Area', y='Estimated Unemployment Rate (%)', palette='Set2')
+    plt.title('Unemployment Rate Distribution: Rural vs Urban')
+    plt.ylabel('Unemployment Rate (%)')
+    plt.tight_layout()
+    plt.savefig('rural_vs_urban.png')
+
+   
+    pivot_reg = df_2020.pivot_table(index='Region', columns='Month_Name', 
+                                   values='Estimated Unemployment Rate (%)', aggfunc='mean')
+    month_order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October']
+    pivot_reg = pivot_reg.reindex(columns=month_order)
+    
+    plt.figure(figsize=(14, 12))
+    sns.heatmap(pivot_reg, annot=True, cmap='YlOrRd', fmt=".1f", linewidths=0.5)
+    plt.title('State-wise Monthly Unemployment Progression (2020)')
+    plt.tight_layout()
+    plt.savefig('heatmap_progression.png')
+
+   
+    print("\n--- Top 5 States with Highest Average Unemployment in 2020 ---")
+    print(state_avg.head(5))
+
+   
+    df_2020.to_csv('cleaned_unemployment_analysis_2020.csv', index=False)
+
+if __name__ == "__main__":
+    analyze_unemployment()
